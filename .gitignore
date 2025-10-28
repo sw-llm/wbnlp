@@ -1,0 +1,30 @@
+# Python 编译缓存文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 虚拟环境 (最佳实践)
+venv/
+.env
+env/
+
+# 数据文件
+# 这些是由爬虫生成或用于分析的数据，不应纳入版本控制
+*.csv
+
+# 生成的词云图片
+# 这些图片是由 wordcloudUtil.py 脚本生成的，不属于源代码
+static/article_cloud.jpg
+static/comment_cloud.jpg
+static/comment_user_cloud.jpg
+wordcloud/wordcloud_test.jpg
+wordcloud/wordcloud_test2.jpg
+
+# 数据库文件 (如果使用 sqlite)
+*.sqlite3
+*.db
+
+# 操作系统特定的文件
+.DS_Store
+Thumbs.db

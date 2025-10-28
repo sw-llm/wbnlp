@@ -1,0 +1,271 @@
+<!-- 继承基础模板base.html -->
+{% extends 'base.html' %}
+
+<!-- 定义页面标题 -->
+{% block title %}首页{% endblock %}
+
+<!-- 核心内容区 -->
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 mb-4 mt-1">
+                <div class="d-flex flex-wrap justify-content-between align-items-center">
+                    <h4 class="font-weight-bold">首页</h4>
+
+                </div>
+            </div>
+            <div class="col-lg-8 col-md-12">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="">
+                                        <p class="mb-2 text-secondary">微博文章总量</p>
+                                        <div class="d-flex flex-wrap justify-content-start align-items-center">
+                                            <h5 class="mb-0 font-weight-bold" id="totalArticle">无数据</h5>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="">
+                                        <p class="mb-2 text-secondary">最高点赞微博-作者</p>
+                                        <div class="d-flex flex-wrap justify-content-start align-items-center">
+                                            <h5 class="mb-0 font-weight-bold" id="topAuthor">无数据</h5>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="">
+                                        <p class="mb-2 text-secondary">微博点赞最多-城市</p>
+                                        <div class="d-flex flex-wrap justify-content-start align-items-center">
+                                            <h5 class="mb-0 font-weight-bold" id="topRegion">无数据</h5>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                    <h4 class="font-weight-bold">最近七天微博发布量</h4>
+
+                                </div>
+                                <div id="article7fbl" style="width: 100%;height: 300px" class="custom-chart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-8">
+                <div class="card card-block card-stretch card-height">
+                    <div class="card-header card-header-border d-flex justify-content-between">
+                        <div class="header-title">
+                            <h4 class="card-title">微博点赞量Top6</h4>
+                        </div>
+                    </div>
+                    <div class="card-body-list">
+                        <ul class="list-style-3 mb-0" id="topArticle">
+
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="font-weight-bold mb-3">微博类型占比饼状图</h4>
+                        <div id="articleTypeZb" style="width:100%;height:450px"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="font-weight-bold mb-3">评论用户名词云图</h4>
+                        <img style="width:100%" src="/static/comment_user_cloud.jpg" alt="">
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="font-weight-bold mb-3">评论用户时间占比环形饼状图</h4>
+                        <div id="commentUserZb" style="width:100%;height:450px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Page end  -->
+    </div>
+{% endblock %}
+
+<!-- ECharts图表脚本区 -->
+{% block echarts %}
+    <script>
+
+        function truncateString(str, length) {
+            if (str.length > length) {
+                return str.slice(0, length) + '...';
+            } else {
+                return str;
+            }
+        }
+
+        function getHomePageData() {
+            $.get('/page/homePageData', function (result) {
+                $('#totalArticle').text(result.totalArticle + '个')
+                $('#topAuthor').text(result.topAuthor)
+                $('#topRegion').text(result.topRegion)
+                let topArticles = result.topArticles
+                $("#topArticle").empty()
+                for (let i = 0; i < topArticles.length; i++) {
+                    const article = topArticles[i]
+                    $("#topArticle").append('<li class="p-3 list-item d-flex justify-content-start align-items-center">' +
+                        '<div class="list-style-detail ml-3 mr-2">' +
+                        '<p class="mb-0">' + truncateString(article[0], 20) + '</p>' +
+                        '</div>' +
+                        '<div class="list-style-action d-flex justify-content-end ml-auto">' +
+                        '<h6 class="font-weight-bold">' + article[1] + '👍</h6>' +
+                        '</div>' +
+                        '</li>')
+                }
+            })
+        }
+
+        $(function () {
+            getHomePageData()
+            const timerId = setInterval(() => {
+                getHomePageData()
+            }, 300000) // 5分钟执行一次
+        })
+    </script>
+
+    <script>
+        var chartDom = document.getElementById('article7fbl');
+        var myChart = echarts.init(chartDom);
+        var option;
+
+        option = {
+            xAxis: {
+                name: '微博发布日期',
+                type: 'category',
+                boundaryGap: false,
+                data: {{ xAxis7ArticleData | tojson }}
+            },
+            yAxis: {
+                name: '微博发布量',
+                type: 'value'
+            },
+            series: [
+                {
+                    data: {{ yAxis7ArticleData }},
+                    type: 'line',
+                    areaStyle: {}
+                }
+            ]
+        };
+
+        option && myChart.setOption(option);
+    </script>
+    <script>
+        var chartDom = document.getElementById('articleTypeZb');
+        var myChart = echarts.init(chartDom);
+        var option;
+
+        option = {
+            title: {
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'item'
+            },
+            legend: {
+                orient: 'vertical',
+                right: 'right',
+                type: 'scroll'
+            },
+            series: [
+                {
+                    name: '微博类型占比',
+                    type: 'pie',
+                    radius: '50%',
+                    data: {{ arcTypeData | tojson }},
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+
+        option && myChart.setOption(option);
+    </script>
+
+    <script>
+        var chartDom = document.getElementById('commentUserZb');
+        var myChart = echarts.init(chartDom);
+        var option;
+
+        option = {
+            tooltip: {
+                trigger: 'item'
+            },
+            legend: {
+                top: '5%',
+                left: 'center'
+            },
+            series: [
+                {
+                    name: '评论用户时间占比',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: false,
+                        position: 'center'
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: 40,
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labelLine: {
+                        show: false
+                    },
+                    data: {{ commentData | tojson }}
+                }
+            ]
+        };
+
+        option && myChart.setOption(option);
+    </script>
+{% endblock %}
